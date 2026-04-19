@@ -1,0 +1,194 @@
+---
+import Base from '../../layouts/Base.astro';
+import ProductCard from '../../components/ProductCard.astro';
+import { supabase, type Product, formatPrice } from '../../lib/supabase';
+
+const { slug } = Astro.params;
+if (!slug) return Astro.redirect('/utensils');
+
+const { data: product } = await supabase
+  .from('groundwork_products')
+  .select('*')
+  .eq('slug', slug)
+  .eq('category', 'equipment')
+  .single();
+
+if (!product) return Astro.redirect('/utensils');
+const p = product as Product;
+
+const { data: relatedData } = await supabase
+  .from('groundwork_products')
+  .select('*')
+  .neq('slug', p.slug)
+  .eq('category', 'equipment')
+  .limit(3);
+const related = (relatedData ?? []) as Product[];
+
+const productSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Product',
+  name: p.name,
+  description: p.description || p.short_description,
+  image: p.image_url,
+  sku: p.slug,
+  brand: { '@type': 'Brand', name: 'Groundwork Coffee Co.' },
+  offers: {
+    '@type': 'Offer',
+    price: (p.price_pence / 100).toFixed(2),
+    priceCurrency: p.currency || 'USD',
+    availability: (p.stock ?? 1) > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+    url: new URL(`/utensils/${p.slug}`, Astro.site).toString(),
+  },
+};
+
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: Astro.site?.toString() || '' },
+    { '@type': 'ListItem', position: 2, name: 'Utensils', item: new URL('/utensils', Astro.site).toString() },
+    { '@type': 'ListItem', position: 3, name: p.name, item: new URL(`/utensils/${p.slug}`, Astro.site).toString() },
+  ],
+};
+
+const featureBlocks = {
+  'pour-over-set': { highlights: [
+    { title: 'Borosilicate dripper', body: 'Thick-walled, heat-resistant, and dishwasher safe. Will not absorb flavors between brews.' },
+    { title: 'Matching 600ml carafe', body: 'Pours clean, cleans cleaner, holds enough for two cups or a generous one.' },
+    { title: '100 unbleached filters', body: 'Pre-cut for the included dripper. Compostable paper. No chemical taste.' },
+  ], bestWith: 'Ethiopian Yirgacheffe or Colombia Huila. Pour-over loves bright, clear single origins.' },
+  'french-press': { highlights: [
+    { title: 'Borosilicate glass', body: 'Heat-shock safe. Holds temperature through the steep. Elegant on the counter.' },
+    { title: 'Stainless steel mesh', body: 'Dual-layer fine mesh catches fines without stripping the oils.' },
+    { title: '1 liter capacity', body: 'Four cups at a time — enough for the slow Sunday crew.' },
+  ], bestWith: 'House Dark Roast Blend or Colombia Huila. The full immersion brings out body.' },
+  'coffee-grinder': { highlights: [
+    { title: '40 grind settings', body: 'From Turkish fine to French press coarse, with repeatable, stepped adjustment.' },
+    { title: 'Conical steel burrs', body: 'The shape that matters. Uniform particle size. No dust.' },
+    { title: 'Low-RPM motor', body: 'Quiet, cool, and gentle on the beans. No aroma-killing heat spikes.' },
+  ], bestWith: 'Every bean we roast. The grinder is the foundation of the cup.' },
+  'espresso-accessories': { highlights: [
+    { title: 'Calibrated 58mm tamper', body: 'Preset to 30lb. Level pucks every shot, without thinking about it.' },
+    { title: '5-prong distributor', body: 'Evens the dose before tamping. Eliminates channeling.' },
+    { title: '600ml steaming pitcher', body: 'Laser-etched measurements inside. Builds microfoam worth latte art.' },
+  ], bestWith: 'Signature Espresso Blend or House Dark Roast Blend.' },
+  'pour-over-kettle': { highlights: [
+    { title: 'Variable temp 40–100°C', body: 'Precision digital control for every brew style.' },
+    { title: 'Goosneck spout', body: 'Pencil-thin stream. Total control over pour rate.' },
+    { title: '1L stainless body', body: 'Dishwasher-safe. Built to last the next decade of mornings.' },
+  ], bestWith: 'Your entire pour-over rotation. Indispensable.' },
+  'espresso-tamper': { highlights: [
+    { title: 'Calibrated 30lb spring', body: 'Consistent tamp pressure. Repeatable shots.' },
+    { title: '58mm precision base', body: 'Fits the standard commercial portafilter.' },
+    { title: 'Weighted machined body', body: 'Balanced in the hand. Built to outlast the machine.' },
+  ], bestWith: 'Signature Espresso Blend.' },
+  'coffee-scale': { highlights: [
+    { title: '0.1g precision', body: 'The only way to dial in a shot or a ratio.' },
+    { title: 'Built-in brew timer', body: 'Auto-starts on first drip. No fumbling for a phone.' },
+    { title: 'USB-C rechargeable', body: 'No bin full of dead batteries.' },
+  ], bestWith: 'Every brewing method. Weigh in, weigh out, taste better.' },
+};
+
+const details = featureBlocks[p.slug] || {
+  highlights: [
+    { title: 'Built to last', body: p.short_description || 'Designed for the serious home barista.' },
+    { title: 'Professional-grade materials', body: 'The same quality pros expect, scaled for your counter.' },
+    { title: 'Elegant in use', body: 'Heavy where it should be, precise where it matters.' },
+  ],
+  bestWith: 'Pair it with your favorite Groundwork roast.',
+};
+---
+<Base
+  title={p.seo_title || `${p.name} | Groundwork Coffee Co.`}
+  description={p.seo_description || p.short_description || ''}
+  ogImage={p.image_url || undefined}
+  ogType="product"
+  structuredData={[productSchema, breadcrumbSchema]}
+  currentPath="/utensils"
+>
+  <section class="max-w-7xl mx-auto px-5 md:px-8 pt-10 pb-16">
+    <nav class="text-xs opacity-60 mb-6"><a href="/" class="hover:underline">Home</a> / <a href="/utensils" class="hover:underline">Utensils</a> / <span>{p.name}</span></nav>
+    <div class="grid md:grid-cols-2 gap-10 md:gap-16">
+      <div class="relative">
+        <div class="aspect-square rounded-2xl overflow-hidden bg-[color:var(--color-crema)]/30">
+          <img src={p.image_url || ''} alt={`${p.name} — ${p.short_description}`} class="w-full h-full object-cover" loading="eager" />
+        </div>
+      </div>
+      <div>
+        <p class="text-xs uppercase tracking-[0.2em] text-[color:var(--color-copper)] mb-3">{p.subcategory?.replaceAll('-', ' ')}</p>
+        <h1 class="text-4xl md:text-5xl leading-[1.05] mb-4">{p.name}</h1>
+        <p class="text-lg opacity-80 leading-relaxed mb-6">{p.short_description}</p>
+        <div class="flex items-baseline gap-3 mb-6">
+          <span class="text-3xl font-[Fraunces]">{formatPrice(p.price_pence, p.currency)}</span>
+          <span class="text-sm opacity-60">Free U.S. shipping $50+</span>
+        </div>
+        <div class="space-y-4 mb-8">
+          {details.highlights.map((h) => (
+            <div class="border-l-2 border-[color:var(--color-copper)] pl-4">
+              <p class="font-[Fraunces] text-base mb-1">{h.title}</p>
+              <p class="text-sm opacity-80 leading-relaxed">{h.body}</p>
+            </div>
+          ))}
+        </div>
+        <form id="buy-form" class="flex gap-3 items-stretch mb-4" data-slug={p.slug} data-name={p.name} data-price={p.price_pence} data-image={p.image_url}>
+          <div class="flex items-center border border-[color:var(--color-espresso)]/20 rounded-full overflow-hidden">
+            <button type="button" data-step="-1" class="px-4 py-2 hover:bg-[color:var(--color-espresso)]/5">–</button>
+            <input id="qty" type="number" min="1" max="10" value="1" class="w-12 text-center bg-transparent font-medium" />
+            <button type="button" data-step="1" class="px-4 py-2 hover:bg-[color:var(--color-espresso)]/5">+</button>
+          </div>
+          <button type="button" id="add-to-cart" class="btn-primary flex-1">Add to cart</button>
+          <button type="submit" class="btn-secondary whitespace-nowrap">Buy now</button>
+        </form>
+        <p id="cart-msg" class="text-xs opacity-70"></p>
+      </div>
+    </div>
+    {p.description && (
+      <div class="max-w-3xl mx-auto mt-16 md:mt-24">
+        <h2 class="text-3xl md:text-4xl mb-6">Why it's in our kitchen</h2>
+        <p class="text-lg opacity-80 leading-relaxed mb-10">{p.description}</p>
+        <div class="bg-[color:var(--color-crema)]/40 rounded-xl p-6 border border-[color:var(--color-espresso)]/10">
+          <p class="text-xs uppercase tracking-wider opacity-60 mb-2">Best paired with</p>
+          <p class="text-base leading-relaxed">{details.bestWith}</p>
+        </div>
+      </div>
+    )}
+  </section>
+  <section class="max-w-7xl mx-auto px-5 md:px-8 py-16 border-t border-[color:var(--color-espresso)]/10">
+    <div class="flex items-end justify-between mb-8">
+      <h2 class="text-3xl md:text-4xl">Complete the setup</h2>
+      <a href="/utensils" class="text-sm underline underline-offset-4">All utensils →</a>
+    </div>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {related.map((r) => <ProductCard product={r} />)}
+    </div>
+  </section>
+  <script is:inline>
+    (function(){
+      const form = document.getElementById('buy-form');
+      if (!form) return;
+      const qty = document.getElementById('qty');
+      const msg = document.getElementById('cart-msg');
+      form.querySelectorAll('button[data-step]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const step = Number(btn.getAttribute('data-step'));
+          const v = Math.max(1, Math.min(10, Number(qty.value||1) + step));
+          qty.value = String(v);
+        });
+      });
+      document.getElementById('add-to-cart').addEventListener('click', () => {
+        window.GW.addToCart({ slug: form.dataset.slug, name: form.dataset.name, price: Number(form.dataset.price), image: form.dataset.image, qty: Number(qty.value||1) });
+        msg.textContent = `Added ${qty.value} to cart.`;
+      });
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        msg.textContent = 'Redirecting to checkout…';
+        try {
+          const r = await fetch('/api/checkout', { method:'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ items:[{ slug: form.dataset.slug, qty: Number(qty.value||1) }] }) });
+          const j = await r.json();
+          if (j.url) window.location.href = j.url;
+          else msg.textContent = j.error || 'Checkout failed';
+        } catch(err){ msg.textContent = 'Checkout failed'; }
+      });
+    })();
+  </script>
+</Base>

@@ -1,0 +1,183 @@
+---
+import Base from '../../layouts/Base.astro';
+import ProductCard from '../../components/ProductCard.astro';
+import { supabase, type Product, formatPrice } from '../../lib/supabase';
+
+const { slug } = Astro.params;
+if (!slug) return Astro.redirect('/coffee');
+
+const { data: product } = await supabase
+  .from('groundwork_products')
+  .select('*')
+  .eq('slug', slug)
+  .eq('category', 'coffee')
+  .single();
+
+if (!product) return Astro.redirect('/coffee');
+const p = product as Product;
+
+const { data: relatedData } = await supabase
+  .from('groundwork_products')
+  .select('*')
+  .neq('slug', p.slug)
+  .eq('category', 'coffee')
+  .limit(3);
+const related = (relatedData ?? []) as Product[];
+
+const productSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Product',
+  name: p.name,
+  description: p.description || p.short_description,
+  image: p.image_url,
+  sku: p.slug,
+  brand: { '@type': 'Brand', name: 'Groundwork Coffee Co.' },
+  offers: {
+    '@type': 'Offer',
+    price: (p.price_pence / 100).toFixed(2),
+    priceCurrency: p.currency || 'USD',
+    availability: (p.stock ?? 1) > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+    url: new URL(`/coffee/${p.slug}`, Astro.site).toString(),
+  },
+};
+
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: Astro.site?.toString() || '' },
+    { '@type': 'ListItem', position: 2, name: 'Coffee', item: new URL('/coffee', Astro.site).toString() },
+    { '@type': 'ListItem', position: 3, name: p.name, item: new URL(`/coffee/${p.slug}`, Astro.site).toString() },
+  ],
+};
+
+const tastingNotes = p.tasting_notes || [];
+---
+<Base
+  title={p.seo_title || `${p.name} | Groundwork Coffee Co.`}
+  description={p.seo_description || p.short_description || ''}
+  ogImage={p.image_url || undefined}
+  ogType="product"
+  structuredData={[productSchema, breadcrumbSchema]}
+  currentPath="/coffee"
+>
+  <section class="max-w-7xl mx-auto px-5 md:px-8 pt-10 pb-16">
+    <nav class="text-xs opacity-60 mb-6"><a href="/" class="hover:underline">Home</a> / <a href="/coffee" class="hover:underline">Coffee</a> / <span>{p.name}</span></nav>
+    <div class="grid md:grid-cols-2 gap-10 md:gap-16">
+      <div class="relative">
+        <div class="aspect-square rounded-2xl overflow-hidden bg-[color:var(--color-crema)]/30">
+          <img src={p.image_url || ''} alt={`${p.name} — ${p.short_description}`} class="w-full h-full object-cover" loading="eager" />
+        </div>
+        <div class="absolute -bottom-5 -right-5 bg-[color:var(--color-copper)] text-white rounded-full w-24 h-24 flex items-center justify-center text-center text-xs font-medium rotate-6">Roasted<br/>to order</div>
+      </div>
+      <div>
+        <p class="text-xs uppercase tracking-[0.2em] text-[color:var(--color-copper)] mb-3">{p.subcategory?.replaceAll('-', ' ')} · {p.roast_level ? `${p.roast_level} roast` : 'Roasted fresh'}</p>
+        <h1 class="text-4xl md:text-5xl leading-[1.05] mb-4">{p.name}</h1>
+        <p class="text-lg opacity-80 leading-relaxed mb-6">{p.short_description}</p>
+        <div class="flex items-baseline gap-3 mb-6">
+          <span class="text-3xl font-[Fraunces]">{formatPrice(p.price_pence, p.currency)}</span>
+          {p.weight_grams && <span class="text-sm opacity-60">/ {p.weight_grams}g bag</span>}
+        </div>
+        {tastingNotes.length > 0 && (
+          <div class="mb-6">
+            <p class="text-xs uppercase tracking-wider opacity-60 mb-2">Tasting notes</p>
+            <div class="flex flex-wrap gap-2">
+              {tastingNotes.map((t) => (
+                <span class="px-3 py-1.5 rounded-full border border-[color:var(--color-espresso)]/20 text-sm">{t}</span>
+              ))}
+            </div>
+          </div>
+        )}
+        <div class="grid grid-cols-2 gap-3 text-sm mb-8">
+          {p.origin && <div><p class="opacity-60 text-xs uppercase tracking-wider mb-1">Origin</p><p>{p.origin}</p></div>}
+          {p.process && <div><p class="opacity-60 text-xs uppercase tracking-wider mb-1">Process</p><p>{p.process}</p></div>}
+          {p.roast_level && <div><p class="opacity-60 text-xs uppercase tracking-wider mb-1">Roast</p><p>{p.roast_level}</p></div>}
+          {p.weight_grams && <div><p class="opacity-60 text-xs uppercase tracking-wider mb-1">Weight</p><p>{p.weight_grams}g</p></div>}
+        </div>
+        <form id="buy-form" class="flex gap-3 items-stretch mb-4" data-slug={p.slug} data-name={p.name} data-price={p.price_pence} data-image={p.image_url}>
+          <div class="flex items-center border border-[color:var(--color-espresso)]/20 rounded-full overflow-hidden">
+            <button type="button" data-step="-1" class="px-4 py-2 hover:bg-[color:var(--color-espresso)]/5">–</button>
+            <input id="qty" type="number" min="1" max="10" value="1" class="w-12 text-center bg-transparent font-medium" />
+            <button type="button" data-step="1" class="px-4 py-2 hover:bg-[color:var(--color-espresso)]/5">+</button>
+          </div>
+          <button type="button" id="add-to-cart" class="btn-primary flex-1">Add to cart</button>
+          <button type="submit" class="btn-secondary whitespace-nowrap">Buy now</button>
+        </form>
+        <p id="cart-msg" class="text-xs opacity-70"></p>
+        <p class="text-xs opacity-60 mt-6">Free U.S. shipping on orders over $50. Every bag ships within 24 hours of roasting.</p>
+      </div>
+    </div>
+
+    {p.description && (
+      <div class="max-w-3xl mx-auto mt-16 md:mt-24 prose">
+        <h2 class="text-3xl md:text-4xl mb-6">About this coffee</h2>
+        <p class="text-lg opacity-80 leading-relaxed">{p.description}</p>
+        <div class="mt-8 grid md:grid-cols-3 gap-6 not-prose">
+          <div class="bg-[color:var(--color-crema)]/40 rounded-xl p-5">
+            <h3 class="text-base mb-2 font-[Fraunces]">Best brewed as</h3>
+            <p class="text-sm opacity-80">{p.subcategory === 'espresso' ? 'Espresso. Short, rich, crema-rich.' : p.roast_level === 'Light' ? 'Pour-over or Aeropress — the clean method lets the terroir speak.' : p.roast_level === 'Dark' ? 'French press or espresso — let the body shine.' : 'Pour-over, drip, or French press — a versatile workhorse.'}</p>
+          </div>
+          <div class="bg-[color:var(--color-crema)]/40 rounded-xl p-5">
+            <h3 class="text-base mb-2 font-[Fraunces]">Grind recommendation</h3>
+            <p class="text-sm opacity-80">Pair with our <a href="/utensils/coffee-grinder" class="underline">Precision Burr Grinder</a> — the single biggest upgrade to your cup.</p>
+          </div>
+          <div class="bg-[color:var(--color-crema)]/40 rounded-xl p-5">
+            <h3 class="text-base mb-2 font-[Fraunces]">Freshness</h3>
+            <p class="text-sm opacity-80">Roast date printed on every bag. Best within 4 weeks of roasting. Store sealed at room temperature.</p>
+          </div>
+        </div>
+      </div>
+    )}
+
+    <div class="max-w-3xl mx-auto mt-16 md:mt-20">
+      <h2 class="text-3xl md:text-4xl mb-6">How to brew it right</h2>
+      <ol class="space-y-4 text-base leading-relaxed opacity-80">
+        <li><span class="font-[Fraunces] text-[color:var(--color-copper)] mr-2">01.</span> Start with 15 grams of whole bean coffee per 250ml of water — or a 1:16 ratio.</li>
+        <li><span class="font-[Fraunces] text-[color:var(--color-copper)] mr-2">02.</span> Grind immediately before brewing. Our <a href="/utensils/coffee-grinder" class="underline">Precision Burr Grinder</a> delivers the consistency you need for even extraction.</li>
+        <li><span class="font-[Fraunces] text-[color:var(--color-copper)] mr-2">03.</span> Heat water to 94–96°C. Too hot scorches; too cool under-extracts.</li>
+        <li><span class="font-[Fraunces] text-[color:var(--color-copper)] mr-2">04.</span> Bloom for 30 seconds with double the grounds' weight in water.</li>
+        <li><span class="font-[Fraunces] text-[color:var(--color-copper)] mr-2">05.</span> Finish the pour in 3:00–3:30. Taste. Adjust. Repeat.</li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="max-w-7xl mx-auto px-5 md:px-8 py-16 border-t border-[color:var(--color-espresso)]/10">
+    <div class="flex items-end justify-between mb-8">
+      <h2 class="text-3xl md:text-4xl">You might also love</h2>
+      <a href="/coffee" class="text-sm underline underline-offset-4">All coffee →</a>
+    </div>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {related.map((r) => <ProductCard product={r} />)}
+    </div>
+  </section>
+
+  <script is:inline>
+    (function(){
+      const form = document.getElementById('buy-form');
+      if (!form) return;
+      const qty = document.getElementById('qty');
+      const msg = document.getElementById('cart-msg');
+      form.querySelectorAll('button[data-step]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const step = Number(btn.getAttribute('data-step'));
+          const v = Math.max(1, Math.min(10, Number(qty.value||1) + step));
+          qty.value = String(v);
+        });
+      });
+      document.getElementById('add-to-cart').addEventListener('click', () => {
+        window.GW.addToCart({ slug: form.dataset.slug, name: form.dataset.name, price: Number(form.dataset.price), image: form.dataset.image, qty: Number(qty.value||1) });
+        msg.textContent = `Added ${qty.value} to cart.`;
+      });
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        msg.textContent = 'Redirecting to checkout…';
+        try {
+          const r = await fetch('/api/checkout', { method:'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ items:[{ slug: form.dataset.slug, qty: Number(qty.value||1) }] }) });
+          const j = await r.json();
+          if (j.url) window.location.href = j.url;
+          else msg.textContent = j.error || 'Checkout failed';
+        } catch(err){ msg.textContent = 'Checkout failed'; }
+      });
+    })();
+  </script>
+</Base>
