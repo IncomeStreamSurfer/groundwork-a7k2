@@ -1,0 +1,83 @@
+---
+import Base from '../../layouts/Base.astro';
+import { supabase, type ContentPost } from '../../lib/supabase';
+
+const { data } = await supabase
+  .from('groundwork_content')
+  .select('*')
+  .not('published_at', 'is', null)
+  .order('published_at', { ascending: false });
+
+const posts = (data ?? []) as ContentPost[];
+
+const blogSchema = { '@context': 'https://schema.org', '@type': 'Blog', name: 'The Groundwork Journal', description: 'Brewing guides, origin stories, gear reviews, and barista tips.', url: new URL('/blog', Astro.site).toString() };
+---
+<Base
+  title="Coffee Blog — Brewing Tips & Guides | Groundwork Coffee Co."
+  description="Explore brewing guides, bean origin stories, gear reviews, and barista tips from the Groundwork Coffee Co. team. Level up your home coffee game."
+  structuredData={blogSchema}
+  currentPath="/blog"
+>
+  <section class="max-w-5xl mx-auto px-5 md:px-8 pt-16 md:pt-20 pb-12">
+    <nav class="text-xs opacity-60 mb-6"><a href="/" class="hover:underline">Home</a> / <span>Journal</span></nav>
+    <p class="text-xs uppercase tracking-[0.2em] text-[color:var(--color-copper)] mb-4">The Groundwork Journal</p>
+    <h1 class="text-5xl md:text-7xl leading-[0.95] mb-6 max-w-3xl">Coffee tips, guides & stories.</h1>
+    <p class="text-lg opacity-70 max-w-2xl">Brewing how-tos, gear deep-dives, origin trip reports, and the occasional opinion piece from our roaster. New articles drop as they're ready — no filler.</p>
+  </section>
+  {posts.length === 0 ? (
+    <section class="max-w-3xl mx-auto px-5 md:px-8 py-16 text-center">
+      <div class="bg-[color:var(--color-crema)]/40 rounded-2xl p-10 md:p-14">
+        <div class="text-5xl mb-4">✍️</div>
+        <h2 class="text-3xl md:text-4xl mb-4">Fresh articles soon.</h2>
+        <p class="opacity-80 leading-relaxed max-w-lg mx-auto mb-8">We're writing a handful of deep-dive brewing guides and origin trip reports right now. Drop your email below to be the first to read them.</p>
+        <form id="sub-form" class="flex flex-col sm:flex-row gap-2 max-w-md mx-auto">
+          <input type="email" name="email" required placeholder="your@email.com" class="flex-1 bg-transparent border border-[color:var(--color-espresso)]/20 rounded-full px-5 py-3 focus:outline-none focus:border-[color:var(--color-copper)]" />
+          <button class="btn-primary">Notify me</button>
+        </form>
+        <p id="sub-msg" class="text-xs mt-3 opacity-70"></p>
+      </div>
+    </section>
+  ) : (
+    <section class="max-w-5xl mx-auto px-5 md:px-8 pb-20 grid md:grid-cols-2 gap-8">
+      {posts.map((p) => (
+        <a href={`/blog/${p.slug}`} class="group">
+          {p.cover_image_url && (
+            <div class="aspect-[5/3] rounded-xl overflow-hidden mb-4 bg-[color:var(--color-crema)]/30">
+              <img src={p.cover_image_url} alt={p.title} class="w-full h-full object-cover group-hover:scale-105 transition duration-500" loading="lazy" />
+            </div>
+          )}
+          {p.tags && p.tags.length > 0 && (<p class="text-xs uppercase tracking-wider opacity-60 mb-2">{p.tags.slice(0,2).join(' · ')}</p>)}
+          <h2 class="text-2xl md:text-3xl font-[Fraunces] mb-2 group-hover:text-[color:var(--color-copper)] transition">{p.title}</h2>
+          <p class="opacity-70 text-sm leading-relaxed line-clamp-3">{p.excerpt || p.seo_description}</p>
+          <p class="text-xs opacity-50 mt-3">{p.published_at ? new Date(p.published_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : ''}</p>
+        </a>
+      ))}
+    </section>
+  )}
+  <section class="max-w-5xl mx-auto px-5 md:px-8 pb-20 text-center border-t border-[color:var(--color-espresso)]/10 pt-16">
+    <h2 class="text-3xl md:text-4xl mb-4">From the roaster to your cup.</h2>
+    <p class="opacity-70 max-w-xl mx-auto mb-6">While you're here, check out what we're roasting and the gear we use to brew it.</p>
+    <div class="flex gap-3 justify-center flex-wrap">
+      <a href="/coffee" class="btn-primary">Shop Coffee</a>
+      <a href="/utensils" class="btn-secondary">Shop Utensils</a>
+    </div>
+  </section>
+  <script is:inline>
+    (function(){
+      const f = document.getElementById('sub-form');
+      if (!f) return;
+      f.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const msg = document.getElementById('sub-msg');
+        msg.textContent = 'Subscribing…';
+        const email = new FormData(f).get('email');
+        try {
+          const r = await fetch('/api/subscribe', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email }) });
+          const j = await r.json();
+          msg.textContent = r.ok ? 'Thanks — we\u2019ll be in touch.' : (j.error || 'Something went wrong');
+          if (r.ok) f.reset();
+        } catch(_) { msg.textContent = 'Network error'; }
+      });
+    })();
+  </script>
+</Base>

@@ -1,0 +1,65 @@
+---
+import Base from '../../layouts/Base.astro';
+import { supabase, type ContentPost } from '../../lib/supabase';
+
+const { slug } = Astro.params;
+if (!slug) return Astro.redirect('/blog');
+
+const { data } = await supabase.from('groundwork_content').select('*').eq('slug', slug).not('published_at', 'is', null).single();
+if (!data) return Astro.redirect('/blog');
+const post = data as ContentPost;
+
+const blogPostingSchema = { '@context': 'https://schema.org', '@type': 'BlogPosting', headline: post.title, description: post.seo_description || post.excerpt, image: post.cover_image_url, datePublished: post.published_at, dateModified: post.published_at, author: { '@type': 'Organization', name: 'Groundwork Coffee Co.' }, publisher: { '@type': 'Organization', name: 'Groundwork Coffee Co.', logo: { '@type': 'ImageObject', url: new URL('/favicon.svg', Astro.site).toString() } }, mainEntityOfPage: { '@type': 'WebPage', '@id': new URL(`/blog/${post.slug}`, Astro.site).toString() } };
+const breadcrumb = { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: 'Home', item: Astro.site?.toString() || '' }, { '@type': 'ListItem', position: 2, name: 'Journal', item: new URL('/blog', Astro.site).toString() }, { '@type': 'ListItem', position: 3, name: post.title, item: new URL(`/blog/${post.slug}`, Astro.site).toString() }] };
+
+function renderBody(body) {
+  if (!body) return '';
+  return body.split(/\n\n+/).map((p) => {
+    const t = p.trim();
+    if (t.startsWith('### ')) return `<h3>${t.slice(4)}</h3>`;
+    if (t.startsWith('## ')) return `<h2>${t.slice(3)}</h2>`;
+    if (t.startsWith('# ')) return `<h2>${t.slice(2)}</h2>`;
+    if (t.startsWith('- ')) {
+      const items = t.split(/\n- /).map((l, i) => `<li>${(i === 0 ? l.slice(2) : l).trim()}</li>`).join('');
+      return `<ul>${items}</ul>`;
+    }
+    return `<p>${t.replace(/\n/g, '<br/>')}</p>`;
+  }).join('\n');
+}
+---
+<Base
+  title={post.seo_title || `${post.title} | Groundwork Coffee Co.`}
+  description={post.seo_description || post.excerpt || ''}
+  ogImage={post.cover_image_url || undefined}
+  ogType="article"
+  publishDate={post.published_at || undefined}
+  tags={post.tags || []}
+  structuredData={[blogPostingSchema, breadcrumb]}
+  currentPath="/blog"
+>
+  <article class="max-w-3xl mx-auto px-5 md:px-8 pt-12 md:pt-16 pb-20">
+    <nav class="text-xs opacity-60 mb-6"><a href="/" class="hover:underline">Home</a> / <a href="/blog" class="hover:underline">Journal</a> / <span>{post.title}</span></nav>
+    {post.tags && post.tags.length > 0 && (<p class="text-xs uppercase tracking-[0.2em] text-[color:var(--color-copper)] mb-4">{post.tags.slice(0,3).join(' · ')}</p>)}
+    <h1 class="text-4xl md:text-6xl leading-[1.05] mb-6">{post.title}</h1>
+    {post.excerpt && <p class="text-xl opacity-80 leading-relaxed mb-6">{post.excerpt}</p>}
+    <p class="text-sm opacity-60 mb-10">{post.published_at ? new Date(post.published_at).toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' }) : ''}</p>
+    {post.cover_image_url && (<div class="aspect-[16/9] rounded-2xl overflow-hidden mb-10"><img src={post.cover_image_url} alt={post.title} class="w-full h-full object-cover" loading="eager" /></div>)}
+    <div class="prose-article" set:html={renderBody(post.body)} />
+    <div class="mt-16 pt-10 border-t border-[color:var(--color-espresso)]/10 text-center">
+      <p class="text-sm opacity-70 mb-4">Enjoyed this? Try the coffees we write about.</p>
+      <div class="flex flex-wrap justify-center gap-3">
+        <a href="/coffee" class="btn-primary">Shop Coffee</a>
+        <a href="/blog" class="btn-secondary">More articles</a>
+      </div>
+    </div>
+  </article>
+  <style is:global>
+    .prose-article > * { margin-bottom: 1.5rem; }
+    .prose-article h2 { font-family: Fraunces, serif; font-size: 1.875rem; margin-top: 2.5rem; letter-spacing: -0.01em; }
+    .prose-article h3 { font-family: Fraunces, serif; font-size: 1.375rem; margin-top: 2rem; }
+    .prose-article p { font-size: 1.0625rem; line-height: 1.75; opacity: 0.88; }
+    .prose-article ul { padding-left: 1.5rem; list-style: disc; }
+    .prose-article ul li { margin-bottom: 0.5rem; line-height: 1.7; }
+    .prose-article a { text-decoration: underline; text-underline-offset: 2px; }
+  </style>
+</Base>

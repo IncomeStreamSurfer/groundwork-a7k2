@@ -1,0 +1,26 @@
+---
+import Base from '../../layouts/Base.astro';
+---
+<Base
+  title="Checkout Cancelled | Groundwork Coffee Co."
+  description="Your order was not completed, but your cart is saved. Browse our coffee and brewing gear or reach out if you need help. We're happy to assist."
+  currentPath="/"
+  noindex={true}
+>
+  <section class="max-w-3xl mx-auto px-5 md:px-8 py-20 md:py-28 text-center">
+    <div class="text-5xl mb-5">☕</div>
+    <p class="text-xs uppercase tracking-[0.2em] text-[color:var(--color-copper)] mb-4">No worries</p>
+    <h1 class="text-5xl md:text-6xl mb-5 leading-[1.02]">Your cart is saved — come back anytime.</h1>
+    <p class="text-lg opacity-70 max-w-xl mx-auto mb-10">Your order wasn't completed, but nothing's lost. Your cart is right where you left it. If something went sideways with payment or you just want to talk it over, our support team is a message away.</p>
+    <div class="flex flex-wrap gap-3 justify-center">
+      <a href="/cart" class="btn-primary">Back to cart</a>
+      <a href="/shop" class="btn-secondary">Keep browsing</a>
+      <a href="/contact" class="btn-secondary">Need help?</a>
+    </div>
+    <div class="mt-16 grid sm:grid-cols-3 gap-6 text-left text-sm">
+      <a href="/faq" class="bg-[color:var(--color-crema)]/40 rounded-xl p-5 hover:bg-[color:var(--color-crema)]/60 transition"><p class="font-[Fraunces] text-base mb-1">Have a question?</p><p class="opacity-70">Visit our FAQ for quick answers →</p></a>
+      <a href="/shipping-returns" class="bg-[color:var(--color-crema)]/40 rounded-xl p-5 hover:bg-[color:var(--color-crema)]/60 transition"><p class="font-[Fraunces] text-base mb-1">Shipping info</p><p class="opacity-70">Timelines, packaging, returns →</p></a>
+      <a href="/contact" class="bg-[color:var(--color-crema)]/40 rounded-xl p-5 hover:bg-[color:var(--color-crema)]/60 transition"><p class="font-[Fraunces] text-base mb-1">Talk to us</p><p class="opacity-70">We reply within a business day →</p></a>
+    </div>
+  </section>
+</Base>

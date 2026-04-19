@@ -1,0 +1,33 @@
+---
+import Base from '../../layouts/Base.astro';
+const sessionId = Astro.url.searchParams.get('session_id') || '';
+---
+<Base
+  title="Order Confirmed | Groundwork Coffee Co."
+  description="Thank you for your order! Your freshly roasted coffee and brewing gear will be on its way shortly. Check your email for tracking details."
+  currentPath="/"
+  noindex={true}
+>
+  <section class="max-w-3xl mx-auto px-5 md:px-8 py-20 md:py-28 text-center">
+    <div class="text-6xl mb-5">🎉</div>
+    <p class="text-xs uppercase tracking-[0.2em] text-[color:var(--color-copper)] mb-4">All set</p>
+    <h1 class="text-5xl md:text-6xl mb-5 leading-[1.02]">Order confirmed — your coffee is on its way!</h1>
+    <p class="text-lg opacity-70 mb-6">Thank you. A confirmation email with your order details is heading to your inbox now. Beans will be roasted and shipped within 24 hours.</p>
+    {sessionId && (<p class="text-xs opacity-50 mb-8">Reference: {sessionId.slice(0,18)}…</p>)}
+    <div class="bg-[color:var(--color-crema)]/40 rounded-2xl p-8 my-10 text-left">
+      <h2 class="font-[Fraunces] text-2xl mb-3">While you wait…</h2>
+      <ul class="space-y-2 text-sm opacity-80">
+        <li>→ Read our <a href="/blog" class="underline">brewing guides</a> to get the most out of your next cup.</li>
+        <li>→ Learn more about <a href="/about" class="underline">where our beans come from</a>.</li>
+        <li>→ Forgot something? <a href="/shop" class="underline">Browse the shop</a>.</li>
+      </ul>
+    </div>
+    <script is:inline>
+      try { localStorage.removeItem('gw_cart'); window.dispatchEvent(new Event('gw-cart-updated')); } catch(_){}
+    </script>
+    <div class="flex flex-wrap gap-3 justify-center">
+      <a href="/shop" class="btn-primary">Keep shopping</a>
+      <a href="/contact" class="btn-secondary">Contact support</a>
+    </div>
+  </section>
+</Base>

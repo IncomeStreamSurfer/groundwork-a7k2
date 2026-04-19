@@ -1,0 +1,103 @@
+---
+import Base from '../layouts/Base.astro';
+---
+<Base
+  title="Your Cart | Groundwork Coffee Co."
+  description="Review your selected coffee and brewing gear before checkout. Free shipping on orders over $50 at Groundwork Coffee Co."
+  currentPath="/cart"
+  noindex={true}
+>
+  <section class="max-w-4xl mx-auto px-5 md:px-8 pt-14 md:pt-20 pb-20">
+    <nav class="text-xs opacity-60 mb-6"><a href="/" class="hover:underline">Home</a> / <span>Cart</span></nav>
+    <h1 class="text-5xl md:text-6xl leading-[1.02] mb-8">Your cart</h1>
+    <div id="cart-empty" class="hidden text-center py-16 border border-dashed border-[color:var(--color-espresso)]/20 rounded-2xl">
+      <div class="text-5xl mb-4">☕</div>
+      <p class="text-lg mb-4 opacity-80">Your cart is empty.</p>
+      <a href="/shop" class="btn-primary">Browse the shop</a>
+    </div>
+    <div id="cart-full" class="hidden">
+      <div id="cart-items" class="space-y-4 mb-8"></div>
+      <div class="border-t border-[color:var(--color-espresso)]/10 pt-6">
+        <div class="flex justify-between text-lg mb-2"><span>Subtotal</span><span id="subtotal" class="font-[Fraunces]">$0.00</span></div>
+        <p id="shipping-note" class="text-sm opacity-70 mb-6">Shipping calculated at checkout. Free U.S. shipping on orders over $50.</p>
+        <div class="flex flex-wrap gap-3 justify-end"><a href="/shop" class="btn-secondary">Keep shopping</a><button id="checkout-btn" class="btn-primary">Checkout</button></div>
+        <p id="checkout-msg" class="text-xs opacity-70 mt-2 text-right"></p>
+      </div>
+    </div>
+    <div class="mt-16 pt-10 border-t border-[color:var(--color-espresso)]/10 grid sm:grid-cols-3 gap-6 text-sm opacity-80">
+      <a href="/faq" class="hover:opacity-60">FAQ →</a>
+      <a href="/shipping-returns" class="hover:opacity-60">Shipping & Returns →</a>
+      <a href="/contact" class="hover:opacity-60">Contact →</a>
+    </div>
+  </section>
+  <script is:inline>
+    (function(){
+      function fmt(n){ return '$' + (n/100).toFixed(2); }
+      function render(){
+        const cart = JSON.parse(localStorage.getItem('gw_cart')||'[]');
+        const empty = document.getElementById('cart-empty');
+        const full = document.getElementById('cart-full');
+        if (!cart.length){ empty.classList.remove('hidden'); full.classList.add('hidden'); return; }
+        empty.classList.add('hidden'); full.classList.remove('hidden');
+        const wrap = document.getElementById('cart-items');
+        wrap.innerHTML = '';
+        let subtotal = 0;
+        cart.forEach((it, idx) => {
+          subtotal += (it.price||0) * (it.qty||1);
+          const row = document.createElement('div');
+          row.className = 'flex gap-4 items-center bg-[color:var(--color-cream)] border border-[color:var(--color-espresso)]/10 rounded-xl p-4';
+          row.innerHTML = `
+            <div class="w-20 h-20 rounded-lg overflow-hidden bg-[color:var(--color-crema)]/30 flex-shrink-0">
+              ${it.image ? `<img src="${it.image}" alt="${it.name}" class="w-full h-full object-cover" />` : ''}
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="font-[Fraunces] text-lg truncate">${it.name}</p>
+              <p class="text-sm opacity-70">${fmt(it.price)} each</p>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="flex items-center border border-[color:var(--color-espresso)]/20 rounded-full overflow-hidden text-sm">
+                <button data-idx="${idx}" data-step="-1" class="px-3 py-1 hover:bg-[color:var(--color-espresso)]/5">\u2013</button>
+                <span class="w-6 text-center">${it.qty}</span>
+                <button data-idx="${idx}" data-step="1" class="px-3 py-1 hover:bg-[color:var(--color-espresso)]/5">+</button>
+              </div>
+              <span class="font-[Fraunces] whitespace-nowrap w-16 text-right">${fmt(it.price*it.qty)}</span>
+              <button data-remove="${idx}" class="text-xs opacity-60 hover:text-red-700 hover:opacity-100" aria-label="Remove">\u00d7</button>
+            </div>`;
+          wrap.appendChild(row);
+        });
+        document.getElementById('subtotal').textContent = fmt(subtotal);
+        wrap.querySelectorAll('button[data-step]').forEach(b => b.addEventListener('click', ()=>{
+          const i = Number(b.getAttribute('data-idx'));
+          const step = Number(b.getAttribute('data-step'));
+          const c = JSON.parse(localStorage.getItem('gw_cart')||'[]');
+          if (!c[i]) return;
+          c[i].qty = Math.max(1, Math.min(20, (c[i].qty||1) + step));
+          localStorage.setItem('gw_cart', JSON.stringify(c));
+          window.dispatchEvent(new Event('gw-cart-updated'));
+          render();
+        }));
+        wrap.querySelectorAll('button[data-remove]').forEach(b => b.addEventListener('click', ()=>{
+          const i = Number(b.getAttribute('data-remove'));
+          const c = JSON.parse(localStorage.getItem('gw_cart')||'[]');
+          c.splice(i,1);
+          localStorage.setItem('gw_cart', JSON.stringify(c));
+          window.dispatchEvent(new Event('gw-cart-updated'));
+          render();
+        }));
+      }
+      render();
+      window.addEventListener('gw-cart-updated', render);
+      document.getElementById('checkout-btn').addEventListener('click', async () => {
+        const msg = document.getElementById('checkout-msg');
+        msg.textContent = 'Redirecting…';
+        const cart = JSON.parse(localStorage.getItem('gw_cart')||'[]');
+        try {
+          const r = await fetch('/api/checkout', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ items: cart.map(i => ({ slug:i.slug, qty:i.qty })) }) });
+          const j = await r.json();
+          if (j.url) window.location.href = j.url;
+          else msg.textContent = j.error || 'Checkout failed';
+        } catch(e){ msg.textContent = 'Network error'; }
+      });
+    })();
+  </script>
+</Base>
