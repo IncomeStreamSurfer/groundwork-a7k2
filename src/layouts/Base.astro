@@ -1,0 +1,62 @@
+---
+import '../styles/global.css';
+import SEOHead from '../components/SEOHead.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  ogImage?: string;
+  ogType?: string;
+  canonicalUrl?: string;
+  author?: string;
+  publishDate?: string;
+  modifiedDate?: string;
+  tags?: string[];
+  structuredData?: object | object[];
+  noindex?: boolean;
+  currentPath?: string;
+}
+
+const { currentPath, ...seo } = Astro.props;
+
+const orgSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'Groundwork Coffee Co.',
+  url: Astro.site?.toString() || '',
+  logo: new URL('/logo.svg', Astro.site).toString(),
+  description: 'Specialty coffee and brewing gear for the serious home barista.',
+  sameAs: [],
+};
+
+const merged = seo.structuredData
+  ? (Array.isArray(seo.structuredData) ? [orgSchema, ...seo.structuredData] : [orgSchema, seo.structuredData])
+  : [orgSchema];
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <SEOHead {...seo} structuredData={merged} />
+</head>
+<body class="min-h-screen flex flex-col">
+  <Nav current={currentPath} />
+  <main class="flex-1"><slot /></main>
+  <Footer />
+  <script is:inline>
+    window.GW = window.GW || {};
+    window.GW.addToCart = function(item){
+      try {
+        const cart = JSON.parse(localStorage.getItem('gw_cart')||'[]');
+        const existing = cart.find(i => i.slug === item.slug);
+        if (existing) existing.qty += (item.qty||1);
+        else cart.push({ slug:item.slug, name:item.name, price:item.price, image:item.image, qty:item.qty||1 });
+        localStorage.setItem('gw_cart', JSON.stringify(cart));
+        window.dispatchEvent(new Event('gw-cart-updated'));
+        return cart;
+      } catch(_){ return []; }
+    };
+  </script>
+</body>
+</html>

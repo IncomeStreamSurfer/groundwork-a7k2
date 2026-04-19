@@ -1,32 +1,144 @@
 ---
-import '../styles/global.css';
+import Base from '../layouts/Base.astro';
+import { supabase, type Product, formatPrice } from '../lib/supabase';
+
+const { data: featured } = await supabase
+  .from('groundwork_products')
+  .select('*')
+  .eq('featured', true)
+  .order('category', { ascending: false })
+  .limit(6);
+
+const featuredProducts = (featured ?? []) as Product[];
+
+const websiteSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'Groundwork Coffee Co.',
+  url: Astro.site?.toString() || '',
+  description: 'Specialty coffee beans and brewing gear, roasted to order and shipped fresh.',
+};
 ---
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Building Groundwork Coffee Co.</title>
-  <meta name="description" content="Groundwork Coffee Co. — specialty coffee and brewing gear, delivered fresh. Site going live soon." />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-</head>
-<body class="min-h-screen flex items-center justify-center relative overflow-hidden">
-  <div class="absolute inset-0 noise opacity-30"></div>
-  <div class="text-center px-8 relative z-10">
-    <div class="text-7xl mb-6 relative inline-block">
-      ☕
-      <span class="absolute -top-4 left-1/2 -translate-x-1/2 text-3xl steam">·</span>
-      <span class="absolute -top-6 left-[40%] text-2xl steam" style="animation-delay: 0.6s">·</span>
-      <span class="absolute -top-5 left-[58%] text-2xl steam" style="animation-delay: 1.2s">·</span>
+<Base
+  title="Specialty Coffee & Brewing Gear | Groundwork Coffee Co."
+  description="Shop freshly roasted specialty coffee beans and professional brewing utensils. Elevate your daily brew with Groundwork Coffee Co. Free shipping over $50."
+  structuredData={websiteSchema}
+  currentPath="/"
+>
+  <section class="relative overflow-hidden">
+    <div class="absolute inset-0 noise opacity-20"></div>
+    <div class="max-w-7xl mx-auto px-5 md:px-8 pt-16 md:pt-24 pb-16 md:pb-28 grid md:grid-cols-2 gap-12 md:gap-16 items-center relative">
+      <div>
+        <span class="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-[color:var(--color-copper)] font-medium mb-5">
+          <span class="w-6 h-px bg-[color:var(--color-copper)]"></span> From Bean to Brew
+        </span>
+        <h1 class="text-5xl md:text-7xl leading-[0.95] mb-6">Specialty Coffee<br/><span class="italic font-light">& Brewing Gear,</span><br/>Delivered Fresh.</h1>
+        <p class="text-lg md:text-xl opacity-70 max-w-lg leading-relaxed mb-8">Single-origin beans roasted the day they ship. Professional-grade utensils built to last a lifetime. For everyone who believes the ritual matters as much as the cup.</p>
+        <div class="flex flex-wrap gap-3">
+          <a href="/coffee" class="btn-primary">Shop Coffee</a>
+          <a href="/utensils" class="btn-secondary">Browse Gear</a>
+        </div>
+        <div class="mt-10 flex items-center gap-5 text-sm opacity-70">
+          <span class="flex items-center gap-2">☕ Roasted to order</span>
+          <span class="flex items-center gap-2">✦ Free shipping $50+</span>
+        </div>
+      </div>
+      <div class="relative">
+        <div class="aspect-[4/5] rounded-2xl overflow-hidden bg-[color:var(--color-bean)] relative">
+          <img src="https://images.unsplash.com/photo-1447933601403-0c6688de566e?w=1200&q=80" alt="Freshly roasted specialty coffee beans in a hand-poured cup" class="w-full h-full object-cover" loading="eager" />
+        </div>
+        <div class="absolute -bottom-6 -left-6 bg-[color:var(--color-cream)] border border-[color:var(--color-espresso)]/10 rounded-xl p-5 max-w-[240px] shadow-xl">
+          <div class="text-3xl font-[Fraunces] mb-1">15</div>
+          <p class="text-xs opacity-70 leading-relaxed">Coffees, blends, and tools in rotation. Built for the daily brewer.</p>
+        </div>
+        <div class="absolute -top-6 -right-6 bg-[color:var(--color-copper)] text-white rounded-full w-28 h-28 flex items-center justify-center text-center text-xs font-medium rotate-12">Shipped<br/>within<br/>24 hrs</div>
+      </div>
     </div>
-    <h1 class="text-5xl md:text-6xl mb-4" style="font-family: Fraunces, serif">Building Groundwork Coffee Co.</h1>
-    <p class="text-lg opacity-70 max-w-md mx-auto">Specialty coffee &amp; brewing gear. Site roasting now.</p>
-    <div class="mt-10 inline-flex gap-1">
-      <span class="w-2 h-2 rounded-full bg-[color:var(--color-espresso)] animate-pulse"></span>
-      <span class="w-2 h-2 rounded-full bg-[color:var(--color-espresso)] animate-pulse" style="animation-delay: 0.2s"></span>
-      <span class="w-2 h-2 rounded-full bg-[color:var(--color-espresso)] animate-pulse" style="animation-delay: 0.4s"></span>
+  </section>
+
+  <section class="bg-[color:var(--color-bean)] text-[color:var(--color-cream)]">
+    <div class="max-w-7xl mx-auto px-5 md:px-8 py-20 md:py-24 grid md:grid-cols-2 gap-6">
+      <a href="/coffee" class="group relative rounded-2xl overflow-hidden aspect-[4/3] md:aspect-[5/4]">
+        <img src="https://images.unsplash.com/photo-1559525839-d9acfd3921cc?w=1400&q=80" alt="Bags of freshly roasted specialty coffee beans" class="w-full h-full object-cover group-hover:scale-105 transition duration-700" loading="lazy" />
+        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+        <div class="absolute bottom-7 left-7 right-7">
+          <h2 class="text-3xl md:text-4xl mb-2">Shop Coffee →</h2>
+          <p class="opacity-80 text-sm max-w-xs">Single origins, house blends, and espresso roasts — roasted in small batches.</p>
+        </div>
+      </a>
+      <a href="/utensils" class="group relative rounded-2xl overflow-hidden aspect-[4/3] md:aspect-[5/4]">
+        <img src="https://images.unsplash.com/photo-1510017683484-80b2e53e5162?w=1400&q=80" alt="Pour-over coffee brewing setup with kettle and dripper" class="w-full h-full object-cover group-hover:scale-105 transition duration-700" loading="lazy" />
+        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+        <div class="absolute bottom-7 left-7 right-7">
+          <h2 class="text-3xl md:text-4xl mb-2">Shop Utensils →</h2>
+          <p class="opacity-80 text-sm max-w-xs">Grinders, kettles, tampers, and presses — gear that earns a permanent spot on your counter.</p>
+        </div>
+      </a>
     </div>
-  </div>
-</body>
-</html>
+  </section>
+
+  <section class="max-w-7xl mx-auto px-5 md:px-8 py-20 md:py-24">
+    <div class="flex items-end justify-between mb-10">
+      <div>
+        <p class="text-xs uppercase tracking-[0.2em] text-[color:var(--color-copper)] mb-3">This season's favorites</p>
+        <h2 class="text-4xl md:text-5xl max-w-xl">Pulled from the roaster, hand-picked for you.</h2>
+      </div>
+      <a href="/shop" class="hidden md:inline text-sm underline underline-offset-4 hover:text-[color:var(--color-copper)]">View all products</a>
+    </div>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {featuredProducts.map((p) => (
+        <a href={p.category === 'coffee' ? `/coffee/${p.slug}` : `/utensils/${p.slug}`} class="group">
+          <div class="aspect-square rounded-xl overflow-hidden bg-[color:var(--color-crema)]/30 mb-4">
+            <img src={p.image_url || ''} alt={`${p.name} — ${p.short_description ?? 'Groundwork Coffee product'}`} class="w-full h-full object-cover group-hover:scale-105 transition duration-500" loading="lazy" />
+          </div>
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <p class="text-xs uppercase tracking-wide opacity-60 mb-1">{p.subcategory?.replaceAll('-', ' ')}</p>
+              <h3 class="text-lg font-[Fraunces]">{p.name}</h3>
+              <p class="text-sm opacity-70 mt-1 line-clamp-2">{p.short_description}</p>
+            </div>
+            <span class="font-[Fraunces] text-lg whitespace-nowrap">{formatPrice(p.price_pence, p.currency)}</span>
+          </div>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <section class="relative">
+    <div class="max-w-5xl mx-auto px-5 md:px-8 py-20 md:py-28 text-center">
+      <p class="text-xs uppercase tracking-[0.3em] text-[color:var(--color-copper)] mb-6">Our philosophy</p>
+      <h2 class="text-4xl md:text-6xl leading-tight mb-8 italic font-light">“Great coffee<br/>is never an accident.”</h2>
+      <p class="text-lg md:text-xl opacity-70 max-w-2xl mx-auto leading-relaxed">It takes farmers who care about every cherry, roasters who care about every batch, and drinkers who care about every cup. We source directly, roast to order, and refuse to cut corners — because the first cup of the morning is too important to compromise.</p>
+      <a href="/about" class="inline-block mt-8 text-sm underline underline-offset-4 hover:text-[color:var(--color-copper)]">Read our story →</a>
+    </div>
+  </section>
+
+  <section class="bg-[color:var(--color-crema)]/40 border-y border-[color:var(--color-espresso)]/10">
+    <div class="max-w-7xl mx-auto px-5 md:px-8 py-16 md:py-20 grid md:grid-cols-3 gap-10">
+      <div><div class="text-3xl mb-4">🌱</div><h3 class="text-xl mb-2">Sourced with intent</h3><p class="text-sm opacity-70 leading-relaxed">Every bean is traceable to the farm. We pay above Fair Trade because doing the right thing is cheaper than doing it twice.</p></div>
+      <div><div class="text-3xl mb-4">🔥</div><h3 class="text-xl mb-2">Roasted to order</h3><p class="text-sm opacity-70 leading-relaxed">Your beans ship within 24 hours of roasting. No dusty bags, no wholesale warehouses. Just peak-fresh flavor.</p></div>
+      <div><div class="text-3xl mb-4">🛠</div><h3 class="text-xl mb-2">Built to last</h3><p class="text-sm opacity-70 leading-relaxed">Our utensils are chosen the way a chef picks a knife — heavy, honest, and built to outlast the trend cycle.</p></div>
+    </div>
+  </section>
+
+  <section class="max-w-7xl mx-auto px-5 md:px-8 py-20 md:py-24">
+    <p class="text-xs uppercase tracking-[0.2em] text-[color:var(--color-copper)] mb-3 text-center">From our people</p>
+    <h2 class="text-4xl md:text-5xl text-center mb-12 max-w-2xl mx-auto">Fresh coffee, raving converts.</h2>
+    <div class="grid md:grid-cols-3 gap-6">
+      <figure class="bg-[color:var(--color-cream)] border border-[color:var(--color-espresso)]/10 rounded-2xl p-7"><div class="text-[color:var(--color-copper)] text-2xl mb-3 font-[Fraunces]">&ldquo;</div><blockquote class="text-base leading-relaxed mb-4">The Yirgacheffe genuinely tastes like the tasting notes promised. Blueberries in a cup. Never going back.</blockquote><figcaption class="text-sm opacity-60">Maya, Brooklyn NY</figcaption></figure>
+      <figure class="bg-[color:var(--color-cream)] border border-[color:var(--color-espresso)]/10 rounded-2xl p-7"><div class="text-[color:var(--color-copper)] text-2xl mb-3 font-[Fraunces]">&ldquo;</div><blockquote class="text-base leading-relaxed mb-4">I bought the burr grinder six months ago and my espresso is night-and-day. Should have upgraded years ago.</blockquote><figcaption class="text-sm opacity-60">Daniel, Austin TX</figcaption></figure>
+      <figure class="bg-[color:var(--color-cream)] border border-[color:var(--color-espresso)]/10 rounded-2xl p-7"><div class="text-[color:var(--color-copper)] text-2xl mb-3 font-[Fraunces]">&ldquo;</div><blockquote class="text-base leading-relaxed mb-4">Shipping was absurdly fast and the bag showed up still smelling like the roastery. This is the one.</blockquote><figcaption class="text-sm opacity-60">Priya, San Francisco CA</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="relative overflow-hidden">
+    <div class="max-w-5xl mx-auto px-5 md:px-8 py-20 md:py-24 text-center bg-[color:var(--color-espresso)] text-[color:var(--color-cream)] rounded-t-[3rem]">
+      <h2 class="text-4xl md:text-6xl mb-5">Your next cup is<br/>in a bag waiting for you.</h2>
+      <p class="opacity-70 max-w-md mx-auto mb-8">Start with a single bag, a pour-over kit, or the whole setup. Free U.S. shipping over $50.</p>
+      <div class="flex flex-wrap justify-center gap-3">
+        <a href="/shop" class="bg-[color:var(--color-cream)] text-[color:var(--color-espresso)] px-7 py-3.5 rounded-full font-medium hover:bg-[color:var(--color-copper)] hover:text-white transition">Start shopping</a>
+        <a href="/about" class="border border-[color:var(--color-cream)]/40 px-7 py-3.5 rounded-full font-medium hover:bg-[color:var(--color-cream)] hover:text-[color:var(--color-espresso)] transition">About us</a>
+      </div>
+    </div>
+  </section>
+</Base>

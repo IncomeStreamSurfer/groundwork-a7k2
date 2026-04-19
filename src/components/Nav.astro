@@ -1,0 +1,47 @@
+---
+const { current = '' } = Astro.props;
+const links = [
+  { href: '/shop', label: 'Shop' },
+  { href: '/coffee', label: 'Coffee' },
+  { href: '/utensils', label: 'Utensils' },
+  { href: '/about', label: 'About' },
+  { href: '/blog', label: 'Journal' },
+];
+---
+<header class="sticky top-0 z-40 bg-[color:var(--color-cream)]/85 backdrop-blur border-b border-[color:var(--color-espresso)]/10">
+  <nav class="max-w-7xl mx-auto px-5 md:px-8 flex items-center justify-between h-16">
+    <a href="/" class="flex items-center gap-2 group">
+      <span class="w-8 h-8 rounded-full bg-[color:var(--color-espresso)] text-[color:var(--color-cream)] flex items-center justify-center text-sm font-semibold">G</span>
+      <span class="font-[Fraunces] text-lg tracking-tight">Groundwork</span>
+    </a>
+    <div class="hidden md:flex items-center gap-7 text-sm">
+      {links.map((l) => (
+        <a href={l.href} class={`hover:text-[color:var(--color-copper)] transition ${current === l.href ? 'text-[color:var(--color-copper)]' : ''}`}>{l.label}</a>
+      ))}
+    </div>
+    <div class="flex items-center gap-3">
+      <a href="/cart" class="relative text-sm flex items-center gap-1.5 hover:opacity-70" aria-label="View cart">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3h2l2.4 12.6a1 1 0 0 0 1 .8h8.2a1 1 0 0 0 1-.8L20 7H6"/><circle cx="9" cy="20" r="1.5"/><circle cx="17" cy="20" r="1.5"/></svg>
+        <span class="hidden sm:inline">Cart</span>
+        <span id="cart-count" class="absolute -top-1.5 -right-2 w-4 h-4 rounded-full bg-[color:var(--color-copper)] text-[10px] text-white flex items-center justify-center hidden">0</span>
+      </a>
+    </div>
+  </nav>
+</header>
+<script is:inline>
+  (function(){
+    function updateCount(){
+      try {
+        const cart = JSON.parse(localStorage.getItem('gw_cart')||'[]');
+        const total = cart.reduce((n,i)=>n+(i.qty||0),0);
+        const el = document.getElementById('cart-count');
+        if (!el) return;
+        if (total>0){ el.textContent = String(total); el.classList.remove('hidden'); }
+        else { el.classList.add('hidden'); }
+      } catch(_){}
+    }
+    updateCount();
+    window.addEventListener('storage', updateCount);
+    window.addEventListener('gw-cart-updated', updateCount);
+  })();
+</script>
