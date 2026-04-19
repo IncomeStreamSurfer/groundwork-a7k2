@@ -1,0 +1,77 @@
+---
+import Base from '../layouts/Base.astro';
+
+const aboutSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'AboutPage',
+  name: 'About Groundwork Coffee Co.',
+  description: "Our founding story, sourcing philosophy, and roasting process.",
+  url: new URL('/about', Astro.site).toString(),
+};
+
+const breadcrumb = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: Astro.site?.toString() || '' },
+    { '@type': 'ListItem', position: 2, name: 'About', item: new URL('/about', Astro.site).toString() },
+  ],
+};
+---
+<Base
+  title="Our Story & Mission | Groundwork Coffee Co."
+  description="Learn how Groundwork Coffee Co. went from a passion for great coffee to a full specialty roastery and gear shop. Sourced ethically, roasted with intention."
+  structuredData={[aboutSchema, breadcrumb]}
+  currentPath="/about"
+>
+  <section class="max-w-5xl mx-auto px-5 md:px-8 pt-16 md:pt-24 pb-12">
+    <nav class="text-xs opacity-60 mb-6"><a href="/" class="hover:underline">Home</a> / <span>About</span></nav>
+    <p class="text-xs uppercase tracking-[0.2em] text-[color:var(--color-copper)] mb-4">Our story</p>
+    <h1 class="text-5xl md:text-7xl leading-[0.95] mb-8 max-w-3xl">We believe every cup should be extraordinary.</h1>
+    <p class="text-xl opacity-80 leading-relaxed max-w-2xl">We started Groundwork Coffee Co. because we got tired of good-enough. Tired of supermarket beans ground three months ago. Tired of disposable gear built to fail. Tired of a coffee world that forgot the farmer. So we built the company we wished existed.</p>
+  </section>
+
+  <section class="max-w-5xl mx-auto px-5 md:px-8 py-12 grid md:grid-cols-2 gap-10 md:gap-16 items-center">
+    <div class="aspect-[4/5] rounded-2xl overflow-hidden">
+      <img src="https://images.unsplash.com/photo-1580933073521-dc49ac0d4e6a?w=1000&q=80" alt="A small roastery with drum roaster and bags of green coffee" class="w-full h-full object-cover" loading="lazy" />
+    </div>
+    <div>
+      <h2 class="text-3xl md:text-4xl mb-5">It started with a single bag.</h2>
+      <p class="opacity-80 leading-relaxed mb-4">Our founder spent a year working a farm in Yirgacheffe, watching cherries turn into beans turn into something that tasted like blueberries in a cup. He came back determined that if coffee could taste like that, most of it shouldn't taste like burnt cardboard.</p>
+      <p class="opacity-80 leading-relaxed">We started roasting in a garage with a 1kg sample roaster. Friends became customers. Customers became believers. Believers asked about gear, and we realized the grinder on their counter was as important as the bag on their shelf. So we started offering that too.</p>
+    </div>
+  </section>
+
+  <section class="bg-[color:var(--color-bean)] text-[color:var(--color-cream)]">
+    <div class="max-w-5xl mx-auto px-5 md:px-8 py-16 md:py-20">
+      <p class="text-xs uppercase tracking-[0.2em] text-[color:var(--color-copper)] mb-4">What we stand for</p>
+      <h2 class="text-3xl md:text-5xl mb-10">Three principles that guide everything we do.</h2>
+      <div class="grid md:grid-cols-3 gap-8">
+        <div><div class="text-3xl mb-4">01</div><h3 class="text-xl mb-3 font-[Fraunces]">Direct trade, always</h3><p class="text-sm opacity-75 leading-relaxed">We pay above Fair Trade prices and we visit our origins. Every farmer we buy from has a name, a face, and our cell number. When a harvest is tough, they can call us.</p></div>
+        <div><div class="text-3xl mb-4">02</div><h3 class="text-xl mb-3 font-[Fraunces]">Roast small, ship fast</h3><p class="text-sm opacity-75 leading-relaxed">No warehouses of stale beans. We roast in small batches, multiple times per week, and your coffee ships within 24 hours of coming out of the drum. Freshness isn't a marketing claim. It's the whole point.</p></div>
+        <div><div class="text-3xl mb-4">03</div><h3 class="text-xl mb-3 font-[Fraunces]">Gear that earns its place</h3><p class="text-sm opacity-75 leading-relaxed">We only sell utensils we'd use ourselves. If it doesn't survive a decade on a working barista's counter, it doesn't make the catalog. Buy once, brew forever.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="max-w-5xl mx-auto px-5 md:px-8 py-16 md:py-20">
+    <h2 class="text-3xl md:text-4xl mb-5 max-w-2xl">How we roast.</h2>
+    <p class="opacity-80 leading-relaxed max-w-2xl mb-10">Our process is slow, honest, and obsessive. Every batch is cupped before it ships. If it doesn't taste right, it doesn't go out. Period.</p>
+    <div class="grid md:grid-cols-4 gap-6">
+      <div><div class="font-[Fraunces] text-3xl text-[color:var(--color-copper)] mb-2">01</div><h3 class="text-lg font-[Fraunces] mb-2">Source</h3><p class="text-sm opacity-70 leading-relaxed">Green coffee direct from farmers we know. Specialty grade (85+ SCA score) or nothing.</p></div>
+      <div><div class="font-[Fraunces] text-3xl text-[color:var(--color-copper)] mb-2">02</div><h3 class="text-lg font-[Fraunces] mb-2">Profile</h3><p class="text-sm opacity-70 leading-relaxed">Each lot gets a roast profile dialed to highlight its best character. Light. Medium. Dark. Specific.</p></div>
+      <div><div class="font-[Fraunces] text-3xl text-[color:var(--color-copper)] mb-2">03</div><h3 class="text-lg font-[Fraunces] mb-2">Roast</h3><p class="text-sm opacity-70 leading-relaxed">Small-batch drum roasting, a few times per week. Fresh is the product.</p></div>
+      <div><div class="font-[Fraunces] text-3xl text-[color:var(--color-copper)] mb-2">04</div><h3 class="text-lg font-[Fraunces] mb-2">Cup</h3><p class="text-sm opacity-70 leading-relaxed">Every roast is cupped before release. Tasting notes are earned, not guessed.</p></div>
+    </div>
+  </section>
+
+  <section class="max-w-5xl mx-auto px-5 md:px-8 py-16 border-t border-[color:var(--color-espresso)]/10 text-center">
+    <h2 class="text-3xl md:text-4xl mb-5">Coffee is a daily ritual. Treat it like one.</h2>
+    <p class="opacity-70 max-w-xl mx-auto mb-6">Start your morning better. Grab a bag, grab the gear, or say hello — we like talking coffee with anyone who's listening.</p>
+    <div class="flex flex-wrap gap-3 justify-center">
+      <a href="/shop" class="btn-primary">Shop now</a>
+      <a href="/contact" class="btn-secondary">Say hello</a>
+      <a href="/blog" class="btn-secondary">Read the journal</a>
+    </div>
+  </section>
+</Base>

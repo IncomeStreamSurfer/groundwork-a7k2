@@ -1,0 +1,50 @@
+---
+import Base from '../layouts/Base.astro';
+
+const faqs = [
+  { q: 'How fresh is your coffee?', a: 'Every bag is roasted to order in small batches and ships within 24 hours of roasting. The roast date is printed on every bag. We recommend drinking within 4 weeks of the roast date for peak flavor.' },
+  { q: 'How long does shipping take?', a: 'Standard U.S. shipping is 2-4 business days. Expedited shipping (1-2 business days) is available at checkout. Free standard shipping on orders over $50.' },
+  { q: 'Do you ship internationally?', a: 'We currently ship within the United States. We\u2019re working on expanding to Canada and the UK later this year — subscribe to our newsletter to be the first to know.' },
+  { q: 'What roast levels do you offer?', a: 'We offer light, medium, and dark roasts. Our single-origin coffees (Ethiopian Yirgacheffe, Colombia Huila) are roasted lighter to highlight terroir. Blends like our House Blend and Dark Roast are roasted medium-dark for balance and body. Our Signature Espresso Blend is roasted specifically for espresso extraction.' },
+  { q: 'Whole bean or ground?', a: 'We sell whole bean only. Pre-ground coffee loses up to 60% of its aroma within 20 minutes — and we can\u2019t stand behind a product that\u2019s half dead on arrival. If you don\u2019t own a grinder yet, our Precision Burr Grinder is the single biggest upgrade you can make.' },
+  { q: 'Do you offer a subscription?', a: 'Subscriptions are launching soon. Join the newsletter to be first on the list for a 10% off founding-member discount.' },
+  { q: 'What\u2019s the difference between your utensils and the ones at my local kitchen store?', a: 'We stock gear that professional baristas actually use on working bars. That means conical burr grinders (not blade), variable-temp gooseneck kettles (not whistlers), 58mm calibrated tampers (not the flimsy plastic included with home machines). Pay once for good tools. Brew forever.' },
+  { q: 'Do you offer wholesale?', a: 'Yes — cafes, offices, and subscriptions are all welcome. Reach out to wholesale@groundworkcoffee.co with a bit about your business and we\u2019ll send over a deck and pricing.' },
+  { q: 'Can I return coffee if I don\u2019t like it?', a: 'We want you to love your coffee. If something isn\u2019t working for you, email hello@groundworkcoffee.co within 14 days and we\u2019ll either replace it or refund it. See our full policy on the Shipping & Returns page.' },
+  { q: 'How should I store my coffee?', a: 'In a sealed, opaque container at room temperature — away from light, heat, and moisture. The bag we ship in is resealable and light-blocking. Don\u2019t freeze it. Don\u2019t put it in the fridge. Just close the bag.' },
+];
+
+const faqSchema = { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faqs.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) };
+const breadcrumb = { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: 'Home', item: Astro.site?.toString() || '' }, { '@type': 'ListItem', position: 2, name: 'FAQ', item: new URL('/faq', Astro.site).toString() }] };
+---
+<Base
+  title="FAQ — Orders, Shipping & Coffee | Groundwork Coffee Co."
+  description="Find answers to common questions about ordering, shipping timelines, subscriptions, roast levels, and brewing tips at Groundwork Coffee Co."
+  structuredData={[faqSchema, breadcrumb]}
+  currentPath="/faq"
+>
+  <section class="max-w-4xl mx-auto px-5 md:px-8 pt-16 md:pt-20 pb-12">
+    <nav class="text-xs opacity-60 mb-6"><a href="/" class="hover:underline">Home</a> / <span>FAQ</span></nav>
+    <p class="text-xs uppercase tracking-[0.2em] text-[color:var(--color-copper)] mb-4">We’re here to help</p>
+    <h1 class="text-5xl md:text-6xl leading-[1.02] mb-6">Frequently asked questions</h1>
+    <p class="text-lg opacity-70 max-w-2xl">Ten minutes of reading will probably answer your question. If not, our <a href="/contact" class="underline">contact form</a> is a real inbox with real people on the other end.</p>
+  </section>
+  <section class="max-w-4xl mx-auto px-5 md:px-8 pb-20">
+    <div class="space-y-3">
+      {faqs.map((f) => (
+        <details class="group border border-[color:var(--color-espresso)]/10 rounded-xl px-6 py-4 bg-[color:var(--color-cream)]">
+          <summary class="list-none cursor-pointer flex items-start justify-between gap-4">
+            <span class="font-[Fraunces] text-lg md:text-xl">{f.q}</span>
+            <span class="flex-shrink-0 text-2xl opacity-50 group-open:rotate-45 transition">+</span>
+          </summary>
+          <p class="mt-3 opacity-80 leading-relaxed">{f.a}</p>
+        </details>
+      ))}
+    </div>
+  </section>
+  <section class="max-w-4xl mx-auto px-5 md:px-8 pb-20 text-center">
+    <h2 class="text-3xl md:text-4xl mb-4">Still have a question?</h2>
+    <p class="opacity-70 mb-6">See the <a href="/shipping-returns" class="underline">Shipping & Returns</a> page for logistics details, or write to us directly — we typically reply within a business day.</p>
+    <a href="/contact" class="btn-primary">Contact us</a>
+  </section>
+</Base>

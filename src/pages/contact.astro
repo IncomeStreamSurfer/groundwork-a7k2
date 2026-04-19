@@ -1,0 +1,57 @@
+---
+import Base from '../layouts/Base.astro';
+const schema = { '@context': 'https://schema.org', '@type': 'ContactPage', name: 'Contact Groundwork Coffee Co.', url: new URL('/contact', Astro.site).toString() };
+---
+<Base
+  title="Contact Us | Groundwork Coffee Co."
+  description="Have a question about your order, wholesale pricing, or just want to talk coffee? Reach out to the Groundwork Coffee Co. team — we'd love to hear from you."
+  structuredData={schema}
+  currentPath="/contact"
+>
+  <section class="max-w-5xl mx-auto px-5 md:px-8 pt-16 md:pt-20 pb-12">
+    <nav class="text-xs opacity-60 mb-6"><a href="/" class="hover:underline">Home</a> / <span>Contact</span></nav>
+    <p class="text-xs uppercase tracking-[0.2em] text-[color:var(--color-copper)] mb-4">We like hearing from you</p>
+    <h1 class="text-5xl md:text-6xl leading-[1.02] mb-6">Get in touch — we're coffee people too.</h1>
+    <p class="text-lg opacity-70 max-w-2xl">Questions about an order, wholesale inquiries, or just want to geek out about Ethiopian varietals? Drop a line. A real human on our team will read it and write back, usually within one business day.</p>
+  </section>
+  <section class="max-w-5xl mx-auto px-5 md:px-8 pb-20 grid md:grid-cols-[1.2fr_1fr] gap-12">
+    <form id="contact-form" class="space-y-4">
+      <div class="grid sm:grid-cols-2 gap-4">
+        <label class="block"><span class="text-xs uppercase tracking-wider opacity-70 mb-1 block">Name</span><input type="text" name="name" required class="w-full bg-transparent border border-[color:var(--color-espresso)]/20 rounded-lg px-4 py-3 focus:outline-none focus:border-[color:var(--color-copper)]" /></label>
+        <label class="block"><span class="text-xs uppercase tracking-wider opacity-70 mb-1 block">Email</span><input type="email" name="email" required class="w-full bg-transparent border border-[color:var(--color-espresso)]/20 rounded-lg px-4 py-3 focus:outline-none focus:border-[color:var(--color-copper)]" /></label>
+      </div>
+      <label class="block"><span class="text-xs uppercase tracking-wider opacity-70 mb-1 block">Subject</span>
+        <select name="subject" class="w-full bg-transparent border border-[color:var(--color-espresso)]/20 rounded-lg px-4 py-3 focus:outline-none focus:border-[color:var(--color-copper)]">
+          <option>General question</option><option>Order support</option><option>Wholesale inquiry</option><option>Media / press</option><option>Other</option>
+        </select>
+      </label>
+      <label class="block"><span class="text-xs uppercase tracking-wider opacity-70 mb-1 block">Message</span><textarea name="message" required rows="6" class="w-full bg-transparent border border-[color:var(--color-espresso)]/20 rounded-lg px-4 py-3 focus:outline-none focus:border-[color:var(--color-copper)]"></textarea></label>
+      <button type="submit" class="btn-primary">Send message</button>
+      <p id="contact-msg" class="text-sm opacity-70"></p>
+    </form>
+    <aside class="space-y-8">
+      <div><h3 class="font-[Fraunces] text-xl mb-2">Customer support</h3><p class="text-sm opacity-70 mb-1">For order questions, shipping, and returns.</p><a href="mailto:hello@groundworkcoffee.co" class="text-sm underline underline-offset-4">hello@groundworkcoffee.co</a></div>
+      <div><h3 class="font-[Fraunces] text-xl mb-2">Wholesale</h3><p class="text-sm opacity-70 mb-1">Cafes, offices, subscriptions — we'd love to talk.</p><a href="mailto:wholesale@groundworkcoffee.co" class="text-sm underline underline-offset-4">wholesale@groundworkcoffee.co</a></div>
+      <div><h3 class="font-[Fraunces] text-xl mb-2">Response time</h3><p class="text-sm opacity-70">We answer every email within one business day. Most within a few hours.</p></div>
+      <div class="bg-[color:var(--color-crema)]/40 rounded-xl p-5"><p class="text-xs uppercase tracking-wider opacity-70 mb-2">Before you write</p><p class="text-sm opacity-80">Many common questions are answered in our <a href="/faq" class="underline">FAQ</a> and <a href="/shipping-returns" class="underline">Shipping & Returns</a> pages. You may find your answer faster there.</p></div>
+    </aside>
+  </section>
+  <script is:inline>
+    (function(){
+      const f = document.getElementById('contact-form');
+      if (!f) return;
+      f.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const msg = document.getElementById('contact-msg');
+        msg.textContent = 'Sending…';
+        const data = Object.fromEntries(new FormData(f));
+        try {
+          const r = await fetch('/api/contact', { method:'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) });
+          const j = await r.json();
+          msg.textContent = r.ok ? 'Thanks — we\u2019ll be in touch shortly.' : (j.error || 'Something went wrong');
+          if (r.ok) f.reset();
+        } catch(_) { msg.textContent = 'Network error'; }
+      });
+    })();
+  </script>
+</Base>

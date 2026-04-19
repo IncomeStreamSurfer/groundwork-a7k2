@@ -1,0 +1,54 @@
+---
+import Base from '../layouts/Base.astro';
+const breadcrumb = { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: 'Home', item: Astro.site?.toString() || '' }, { '@type': 'ListItem', position: 2, name: 'Shipping & Returns', item: new URL('/shipping-returns', Astro.site).toString() }] };
+---
+<Base
+  title="Shipping & Returns Policy | Groundwork Coffee Co."
+  description="Get the details on shipping timelines, packaging, and our hassle-free return policy. Groundwork Coffee Co. ships fresh, fast, and with care."
+  structuredData={breadcrumb}
+  currentPath="/shipping-returns"
+>
+  <section class="max-w-4xl mx-auto px-5 md:px-8 pt-16 md:pt-20 pb-12">
+    <nav class="text-xs opacity-60 mb-6"><a href="/" class="hover:underline">Home</a> / <span>Shipping & Returns</span></nav>
+    <p class="text-xs uppercase tracking-[0.2em] text-[color:var(--color-copper)] mb-4">Hassle-free, always</p>
+    <h1 class="text-5xl md:text-6xl leading-[1.02] mb-6">Shipping & Returns — fast, fresh, hassle-free.</h1>
+    <p class="text-lg opacity-70 max-w-2xl">Everything you need to know about how we get your coffee to you, how we pack it, and what happens if something isn’t right.</p>
+  </section>
+  <section class="max-w-4xl mx-auto px-5 md:px-8 pb-20 space-y-12">
+    <div>
+      <h2 class="text-3xl md:text-4xl mb-4">Shipping timelines</h2>
+      <ul class="space-y-3 opacity-80 leading-relaxed">
+        <li><strong class="font-[Fraunces] text-[color:var(--color-copper)]">Standard (free over $50):</strong> 2–4 business days within the continental U.S. $6 flat rate below $50.</li>
+        <li><strong class="font-[Fraunces] text-[color:var(--color-copper)]">Expedited:</strong> 1–2 business days. $14 flat rate.</li>
+        <li><strong class="font-[Fraunces] text-[color:var(--color-copper)]">Alaska, Hawaii, Puerto Rico:</strong> 4–7 business days via USPS Priority. $12 flat rate.</li>
+        <li><strong class="font-[Fraunces] text-[color:var(--color-copper)]">International:</strong> Not available yet. Coming soon — subscribe to be notified.</li>
+      </ul>
+    </div>
+    <div>
+      <h2 class="text-3xl md:text-4xl mb-4">How we pack</h2>
+      <p class="opacity-80 leading-relaxed mb-3">Every bag of coffee ships within 24 hours of roasting. Our bags are resealable, one-way valved, and light-blocking — meaning your beans keep degassing in transit without taking on moisture or air. Gear ships in right-sized recycled cardboard, with plant-based cushioning. No peanuts. No plastic wrap. No landfill karma.</p>
+    </div>
+    <div>
+      <h2 class="text-3xl md:text-4xl mb-4">Returns & exchanges</h2>
+      <p class="opacity-80 leading-relaxed mb-3">We want you to love your coffee and your gear. If something isn’t working out, here’s what to expect:</p>
+      <ul class="space-y-3 opacity-80 leading-relaxed">
+        <li><strong class="font-[Fraunces] text-[color:var(--color-copper)]">Coffee:</strong> If a bag arrives damaged, stale, or just doesn’t taste right, email us within 14 days of delivery. We’ll ship a replacement or refund you — your call. No need to return the original.</li>
+        <li><strong class="font-[Fraunces] text-[color:var(--color-copper)]">Utensils:</strong> Unopened gear can be returned within 30 days for a full refund. Opened gear is eligible for exchange or store credit within 30 days — we just ask that you ship it back in the original packaging.</li>
+        <li><strong class="font-[Fraunces] text-[color:var(--color-copper)]">Defective gear:</strong> If something breaks due to a manufacturing defect within 1 year of purchase, we’ll replace it at no cost.</li>
+      </ul>
+    </div>
+    <div>
+      <h2 class="text-3xl md:text-4xl mb-4">How to start a return</h2>
+      <ol class="space-y-3 opacity-80 leading-relaxed list-decimal pl-5">
+        <li>Email <a href="mailto:hello@groundworkcoffee.co" class="underline">hello@groundworkcoffee.co</a> with your order number and a brief note about the issue.</li>
+        <li>We’ll reply with next steps within one business day.</li>
+        <li>For gear returns, we’ll send a pre-paid return label. Drop off at any USPS location.</li>
+        <li>Refunds process within 3–5 business days of us receiving the item.</li>
+      </ol>
+    </div>
+    <div class="bg-[color:var(--color-crema)]/40 rounded-xl p-6 border border-[color:var(--color-espresso)]/10">
+      <h3 class="font-[Fraunces] text-xl mb-2">Still have questions?</h3>
+      <p class="text-sm opacity-80">Check our <a href="/faq" class="underline">FAQ page</a> or <a href="/contact" class="underline">get in touch</a>. We read every email and we write back within a business day.</p>
+    </div>
+  </section>
+</Base>
