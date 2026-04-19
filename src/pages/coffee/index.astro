@@ -1,0 +1,74 @@
+---
+import Base from '../../layouts/Base.astro';
+import ProductCard from '../../components/ProductCard.astro';
+import { supabase, type Product } from '../../lib/supabase';
+
+const { data } = await supabase
+  .from('groundwork_products')
+  .select('*')
+  .eq('category', 'coffee')
+  .order('featured', { ascending: false })
+  .order('price_pence');
+
+const products = (data ?? []) as Product[];
+const singleOrigin = products.filter((p) => p.subcategory === 'single-origin');
+const blends = products.filter((p) => p.subcategory === 'blend' || p.subcategory === 'espresso');
+const decaf = products.filter((p) => p.subcategory === 'decaf');
+
+const schema = [
+  { '@context': 'https://schema.org', '@type': 'CollectionPage', name: 'Freshly Roasted Coffee Beans — Single Origins & Blends', description: 'Shop specialty single-origin coffees and expertly crafted blends, roasted to order.', url: new URL('/coffee', Astro.site).toString() },
+  { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: Astro.site?.toString() || '' },
+    { '@type': 'ListItem', position: 2, name: 'Coffee', item: new URL('/coffee', Astro.site).toString() },
+  ] },
+];
+---
+<Base
+  title="Buy Coffee Beans Online | Groundwork Coffee Co."
+  description="Shop our freshly roasted single-origin coffees and expertly crafted blends. Roasted to order and shipped direct to your door. Find your perfect cup."
+  structuredData={schema}
+  currentPath="/coffee"
+>
+  <section class="max-w-7xl mx-auto px-5 md:px-8 pt-14 md:pt-20 pb-10">
+    <nav class="text-xs opacity-60 mb-6"><a href="/" class="hover:underline">Home</a> / <span>Coffee</span></nav>
+    <div class="grid md:grid-cols-[1.3fr_1fr] gap-10 md:gap-16 items-end">
+      <div>
+        <p class="text-xs uppercase tracking-[0.2em] text-[color:var(--color-copper)] mb-4">Small-batch. Roasted to order.</p>
+        <h1 class="text-5xl md:text-7xl leading-[0.95] mb-6">Freshly Roasted Coffee Beans — Single Origins & Blends</h1>
+        <p class="text-lg opacity-70 max-w-xl leading-relaxed">We source specialty coffee beans direct from farms we've met, roast them the day you order, and get them to your door within 24 hours. Below you'll find our complete lineup: bright, fruity single origins, balanced house blends, espresso roasts built for pressure, and Swiss Water Process decaf that actually tastes good.</p>
+        <div class="flex gap-3 mt-6">
+          <a href="#single-origin" class="btn-secondary text-sm">Single Origin</a>
+          <a href="#blends" class="btn-secondary text-sm">Blends</a>
+          <a href="/utensils" class="btn-secondary text-sm">Gear →</a>
+        </div>
+      </div>
+      <div class="aspect-[4/5] rounded-2xl overflow-hidden">
+        <img src="https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=1000&q=80" alt="A scoop of specialty coffee beans ready to be ground" class="w-full h-full object-cover" loading="eager" />
+      </div>
+    </div>
+  </section>
+
+  <section id="single-origin" class="max-w-7xl mx-auto px-5 md:px-8 py-12 border-t border-[color:var(--color-espresso)]/10 scroll-mt-20">
+    <div class="flex items-end justify-between mb-8"><h2 class="text-3xl md:text-4xl">Single Origin</h2><p class="text-sm opacity-60 hidden md:block">From one farm, one harvest, one story at a time.</p></div>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">{singleOrigin.map((p) => <ProductCard product={p} />)}</div>
+  </section>
+
+  <section id="blends" class="max-w-7xl mx-auto px-5 md:px-8 py-12 border-t border-[color:var(--color-espresso)]/10 scroll-mt-20">
+    <div class="flex items-end justify-between mb-8"><h2 class="text-3xl md:text-4xl">House Blends & Espresso</h2><p class="text-sm opacity-60 hidden md:block">Crafted for consistency, morning after morning.</p></div>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">{blends.map((p) => <ProductCard product={p} />)}</div>
+  </section>
+
+  {decaf.length > 0 && (
+    <section id="decaf" class="max-w-7xl mx-auto px-5 md:px-8 py-12 border-t border-[color:var(--color-espresso)]/10 scroll-mt-20">
+      <div class="flex items-end justify-between mb-8"><h2 class="text-3xl md:text-4xl">Decaf</h2></div>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">{decaf.map((p) => <ProductCard product={p} />)}</div>
+    </section>
+  )}
+
+  <section class="max-w-5xl mx-auto px-5 md:px-8 py-16 md:py-20 text-center">
+    <p class="text-xs uppercase tracking-[0.2em] text-[color:var(--color-copper)] mb-3">The bean matters. So does the gear.</p>
+    <h2 class="text-3xl md:text-4xl mb-4">Pair your beans with brew gear that does them justice.</h2>
+    <p class="opacity-70 max-w-xl mx-auto mb-6">A great bean brewed badly is a great bean wasted. Our <a href="/utensils/coffee-grinder" class="underline">burr grinder</a>, <a href="/utensils/pour-over-set" class="underline">pour-over set</a>, and <a href="/utensils/french-press" class="underline">French press</a> are the tools we actually use.</p>
+    <a href="/utensils" class="btn-primary">Shop Brewing Gear</a>
+  </section>
+</Base>

@@ -1,0 +1,22 @@
+---
+import { formatPrice, type Product } from '../lib/supabase';
+interface Props { product: Product }
+const { product: p } = Astro.props;
+const href = p.category === 'coffee' ? `/coffee/${p.slug}` : p.category === 'bundle' ? `/shop` : `/utensils/${p.slug}`;
+---
+<a href={href} class="group block">
+  <div class="aspect-square rounded-xl overflow-hidden bg-[color:var(--color-crema)]/30 mb-4 relative">
+    <img src={p.image_url || ''} alt={`${p.name} — ${p.short_description ?? 'Groundwork Coffee product'}`} class="w-full h-full object-cover group-hover:scale-105 transition duration-500" loading="lazy" />
+    {p.featured && (
+      <span class="absolute top-3 left-3 bg-[color:var(--color-copper)] text-white text-[10px] uppercase tracking-wider px-2 py-1 rounded-full">Favorite</span>
+    )}
+  </div>
+  <div class="flex items-start justify-between gap-3">
+    <div class="min-w-0">
+      <p class="text-xs uppercase tracking-wide opacity-60 mb-1">{p.subcategory?.replaceAll('-', ' ')}</p>
+      <h3 class="text-lg font-[Fraunces] truncate">{p.name}</h3>
+      <p class="text-sm opacity-70 mt-1 line-clamp-2">{p.short_description}</p>
+    </div>
+    <span class="font-[Fraunces] text-lg whitespace-nowrap">{formatPrice(p.price_pence, p.currency)}</span>
+  </div>
+</a>
